@@ -3,13 +3,15 @@
  */
 package com.warehouse.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 /**
  * @author AVSIN3
@@ -19,10 +21,10 @@ import javax.persistence.Table;
 @Table(name = "ITEM_LIST")
 public class ItemListVo {
 	
-	@OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id")
-	private long prod_id;
-
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	
 	@Column(name = "art_id", nullable = false)
 	private String art_id;
 
@@ -30,21 +32,23 @@ public class ItemListVo {
 	private String price;
 	
 	@ManyToOne
+	@JsonBackReference
 	private ProductsVo prodVo;
 
 	/**
-	 * @return the prod_id
+	 * @return the id
 	 */
-	public long getProd_id() {
-		return prod_id;
+	public Long getId() {
+		return id;
 	}
 
 	/**
-	 * @param prod_id the prod_id to set
+	 * @param id the id to set
 	 */
-	public void setProd_id(long prod_id) {
-		this.prod_id = prod_id;
+	public void setId(Long id) {
+		this.id = id;
 	}
+
 
 	/**
 	 * @return the art_id

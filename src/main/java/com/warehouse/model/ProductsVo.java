@@ -16,6 +16,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 /**
  * @author AVSIN3
  *
@@ -28,13 +30,14 @@ public class ProductsVo implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+	private Long id;
 
 	@Column(name = "prod_name", nullable = false)
 	private String prod_name;
 
 	@OneToMany(cascade=CascadeType.ALL)
 	@JoinColumn(name = "prod_id", referencedColumnName = "id")
+	@JsonManagedReference
 	private List<ItemListVo> itemList;
 	
 	@Column(name = "isBuyable", nullable = false)
@@ -43,14 +46,14 @@ public class ProductsVo implements Serializable{
 	/**
 	 * @return the id
 	 */
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

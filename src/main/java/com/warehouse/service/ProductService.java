@@ -4,7 +4,6 @@
 package com.warehouse.service;
 
 import java.util.List;
-import java.util.Map;
 
 import com.warehouse.Exception.ProductNotFoundException;
 import com.warehouse.model.ProductsVo;
@@ -19,6 +18,6 @@ public interface ProductService {
 
 	public Boolean isProductAvailable(Long id) throws ProductNotFoundException;
 
-	public Map<String, Boolean> removeProduct(Long id) throws ProductNotFoundException;
+	public ProductsVo updateProductStatus(Long id) throws ProductNotFoundException;
 
 }

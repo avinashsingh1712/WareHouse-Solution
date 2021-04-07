@@ -4,9 +4,7 @@
 package com.warehouse.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,7 @@ import com.warehouse.Exception.ProductNotFoundException;
 import com.warehouse.model.InventryVo;
 import com.warehouse.model.ItemListVo;
 import com.warehouse.model.ProductsVo;
-import com.warehouse.repository.InventryRepository;
+import com.warehouse.repository.ProductDataHandler;
 import com.warehouse.repository.ProductRepository;
 
 /**
@@ -35,13 +33,19 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private ProductRepository pRepository;
 
+//	@Autowired
+//	private InventryRepository iRepository;
+	
 	@Autowired
-	private InventryRepository iRepository;
+	ProductDataHandler prodDataHandler;
+	
+	public ProductServiceImpl() {
+		
+	}
 
-	public ProductServiceImpl(ProductRepository prodRepository, InventryRepository invenRepository) {
+	public ProductServiceImpl(ProductRepository prodRepository) {
 
 		this.pRepository = prodRepository;
-		this.iRepository = invenRepository;
 	}
 
 	/**
@@ -59,7 +63,8 @@ public class ProductServiceImpl implements ProductService {
 		products.forEach(products::add);
 
 		LOGGER.info("Fetching Product Object. List Size ::" + products.size()+ " Class :"+CLASS_NAME);
-		return products;
+		
+		return prodDataHandler.manageProductData();
 	}
 
 	/**
@@ -89,29 +94,22 @@ public class ProductServiceImpl implements ProductService {
 	 * @return Map<String, Boolean> : Object of Map
 	 */
 	@Override
-	public Map<String, Boolean> removeProduct(Long id) throws ProductNotFoundException {
+	public ProductsVo updateProductStatus(Long id) throws ProductNotFoundException {
 
 		// Step 1 - Get the product and there associated Articles.
 		ProductsVo prodVO = findProductByProductId(id);
 
 		// Step2 - Reduce the count of the articles from inventory.
-		inventryCountUpdate(prodVO);
+		InventryVo inventry = inventryCountUpdate(prodVO);
 
-		// Step 3 - Check the articles availability.
-		boolean isAvailable = articleAvailabilityCheck(prodVO);
-
-		// Step 4 - making product as non buyable if any of the article's quantity
+		// Step 3 - making product as non buyable if any of the article's quantity
 		// become zero. If quantity > 0, no change needed.
-		if (!isAvailable) {
+		if (inventry.getQuantity() == 0) {
 			prodVO.setBuyable(false);
-			pRepository.save(prodVO);
 		}
 
-		Map<String, Boolean> response = new HashMap<>();
-		response.put("buyable", prodVO.isBuyable());
-
 		LOGGER.info("Product has been updated and is buyable: " + prodVO.isBuyable());
-		return response;
+		return prodVO;
 	}
 
 	/**
@@ -125,7 +123,9 @@ public class ProductServiceImpl implements ProductService {
 		
 		LOGGER.info("Fetching the Product data for product id: " + id);
 		
-		return pRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product not found :: " + id));
+		pRepository.getOne(id);
+		
+		return prodDataHandler.handleProductData(id);
 	}
 
 	/**
@@ -141,9 +141,9 @@ public class ProductServiceImpl implements ProductService {
 
 		for (ItemListVo item : prodItemList) {
 
-			String itemId = item.getArt_id();
+			String articleId = item.getArt_id();
 
-			InventryVo inventryVO = findArticleCount(itemId);
+			InventryVo inventryVO = findArticleCount(articleId);
 
 			int itemQuantity = inventryVO.getQuantity();
 
@@ -164,19 +164,28 @@ public class ProductServiceImpl implements ProductService {
 	 * @param prodVO : ProductsVo
 	 * @throws ProductNotFoundException : Exception
 	 */
-	private void inventryCountUpdate(ProductsVo prodVO) throws ProductNotFoundException {
+	private InventryVo inventryCountUpdate(ProductsVo prodVO) throws ProductNotFoundException {
 
 		List<ItemListVo> prodItemList = prodVO.getItemList();
 
+		InventryVo inventryVo = null;
 		for (ItemListVo prodItem : prodItemList) {
 
 			String prodArticleId = prodItem.getArt_id();
 
-			InventryVo inventryVo = findArticleCount(prodArticleId);
+			inventryVo = findArticleCount(prodArticleId);
 
 			// Assume, customer is buying the product having each article count 1.
-			inventryVo.setQuantity(inventryVo.getQuantity() - 1);
+			int artQuantity = inventryVo.getQuantity() - 1;
+			
+			inventryVo.setQuantity(artQuantity);
+			
+			// if quantity become zero of any article from the product then product should not be buyable.
+			if(artQuantity==0)
+				break;
 		}
+		LOGGER.info(inventryVo);
+		return inventryVo;
 	}
 
 	/**
@@ -190,10 +199,7 @@ public class ProductServiceImpl implements ProductService {
 
 		LOGGER.info("Fetching the Article details for Article id: " + articleId);
 
-		InventryVo inventryVO = iRepository.findById(articleId)
-				.orElseThrow(() -> new ProductNotFoundException("Article not found :: " + articleId));
-
-		return inventryVO;
+		return prodDataHandler.handleInventryData(articleId);
 	}
 
 }

@@ -5,8 +5,6 @@ package com.warehouse.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -17,11 +15,8 @@ import javax.persistence.Table;
 @Entity(name = "InventryVo")
 @Table(name = "Inventry")
 public class InventryVo {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
 
+	@Id
 	@Column(name = "art_id", nullable = false)
 	private String art_id;
 
@@ -31,19 +26,6 @@ public class InventryVo {
 	@Column(name = "quantity", nullable = false)
 	private Integer quantity;
 
-	/**
-	 * @return the id
-	 */
-	public long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(long id) {
-		this.id = id;
-	}
 
 	/**
 	 * @return the art_id

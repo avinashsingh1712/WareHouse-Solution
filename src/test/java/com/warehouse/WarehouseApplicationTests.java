@@ -1,28 +1,33 @@
 package com.warehouse;
 
-import org.json.JSONException;
-import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
-class WarehouseApplicationTests {
-
-	
-	@Autowired
-	private TestRestTemplate restTemplate;
-	
-	
-	@Test
-	public void contextLoads() throws JSONException {	
-		
-		String response = this.restTemplate.getForObject("/api/v1/products", String.class);
-		
-		JSONAssert.assertEquals("[{id:10001},{id:10002},{id:10003}]", 
-				response, false);
+/**
+ * Unit test for simple App.
+ */
+public class WarehouseApplicationTests extends TestCase {
+	/**
+	 * Create the test case
+	 *
+	 * @param testName name of the test case
+	 */
+	public WarehouseApplicationTests(String testName) {
+		super(testName);
 	}
 
+	/**
+	 * @return the suite of tests being tested
+	 */
+	public static Test suite() {
+		return new TestSuite(WarehouseApplicationTests.class);
+	}
+
+	/**
+	 * Rigorous Test :-)
+	 */
+	public void testApp() {
+		assertTrue(true);
+	}
 }

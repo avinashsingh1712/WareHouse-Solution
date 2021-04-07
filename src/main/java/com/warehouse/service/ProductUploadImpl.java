@@ -38,6 +38,9 @@ public class ProductUploadImpl implements ProductUploadService {
 	@Autowired
 	private InventryRepository iRepository;
 
+	public ProductUploadImpl() {
+		
+	}
 	public ProductUploadImpl(ProductRepository repository, InventryRepository invenRepository) {
 
 		this.pRepository = repository;
@@ -77,7 +80,7 @@ public class ProductUploadImpl implements ProductUploadService {
 
 		ValidateArtilcesData(inventryList);
 		// Step 3 - Update the repository
-		iRepository.saveAll(inventryList);
+		//iRepository.saveAll(inventryList);
 	}
 
 	/**
@@ -114,7 +117,7 @@ public class ProductUploadImpl implements ProductUploadService {
 		ValidateProductsData(prodList);
 		
 		// Step 3 - Update the repository
-		pRepository.saveAll(prodList);
+		//pRepository.saveAll(prodList);
 	}
 
 	/**
