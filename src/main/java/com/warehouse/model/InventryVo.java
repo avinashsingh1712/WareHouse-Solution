@@ -3,6 +3,8 @@
  */
 package com.warehouse.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -14,8 +16,13 @@ import javax.persistence.Table;
  */
 @Entity(name = "InventryVo")
 @Table(name = "Inventry")
-public class InventryVo {
+public class InventryVo implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	@Id
 	@Column(name = "art_id", nullable = false)
 	private String art_id;

@@ -3,7 +3,6 @@
  */
 package com.warehouse.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -14,6 +13,7 @@ import com.warehouse.Exception.ProductNotFoundException;
 import com.warehouse.model.InventryVo;
 import com.warehouse.model.ItemListVo;
 import com.warehouse.model.ProductsVo;
+import com.warehouse.repository.InventryRepository;
 import com.warehouse.repository.ProductDataHandler;
 import com.warehouse.repository.ProductRepository;
 
@@ -33,19 +33,20 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private ProductRepository pRepository;
 
-//	@Autowired
-//	private InventryRepository iRepository;
-	
+	@Autowired
+	private InventryRepository iRepository;
+
 	@Autowired
 	ProductDataHandler prodDataHandler;
-	
+
 	public ProductServiceImpl() {
-		
+
 	}
 
-	public ProductServiceImpl(ProductRepository prodRepository) {
+	public ProductServiceImpl(ProductRepository prodRepository, InventryRepository iRepository) {
 
 		this.pRepository = prodRepository;
+		this.iRepository = iRepository;
 	}
 
 	/**
@@ -57,14 +58,11 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public List<ProductsVo> getAllProducts() {
 
-		List<ProductsVo> products = new ArrayList<>();
-		products = (List<ProductsVo>) pRepository.findAll();
+		List<ProductsVo> productList = (List<ProductsVo>) pRepository.findAll();
 
-		products.forEach(products::add);
+		LOGGER.info("Fetching Product Object. Article List Size ::" + productList.size() + " Class :" + CLASS_NAME);
 
-		LOGGER.info("Fetching Product Object. List Size ::" + products.size()+ " Class :"+CLASS_NAME);
-		
-		return prodDataHandler.manageProductData();
+		return productList;
 	}
 
 	/**
@@ -76,10 +74,11 @@ public class ProductServiceImpl implements ProductService {
 	 */
 	@Override
 	public Boolean isProductAvailable(Long id) throws ProductNotFoundException {
-		
+
 		LOGGER.info("Checking product availability for id ::" + id);
-		
-		// Step 1 - Check the product availability and if its not available, through the exception back as product not available.
+
+		// Step 1 - Check the product availability and if its not available, through the
+		// exception back as product not available.
 		ProductsVo vo = findProductByProductId(id);
 
 		// Step 2 - Check the artiles availability.
@@ -95,7 +94,6 @@ public class ProductServiceImpl implements ProductService {
 	 */
 	@Override
 	public ProductsVo updateProductStatus(Long id) throws ProductNotFoundException {
-
 		// Step 1 - Get the product and there associated Articles.
 		ProductsVo prodVO = findProductByProductId(id);
 
@@ -104,12 +102,23 @@ public class ProductServiceImpl implements ProductService {
 
 		// Step 3 - making product as non buyable if any of the article's quantity
 		// become zero. If quantity > 0, no change needed.
-		if (inventry.getQuantity() == 0) {
+		if (inventry.getQuantity() <= 0) {
 			prodVO.setBuyable(false);
+			pRepository.save(prodVO);
 		}
 
 		LOGGER.info("Product has been updated and is buyable: " + prodVO.isBuyable());
 		return prodVO;
+	}
+
+	/**
+	 * This will fetch all the articles details.
+	 */
+	@Override
+	public List<InventryVo> getAllArticle() {
+
+		List<InventryVo> inVOs = iRepository.findAll();
+		return inVOs;
 	}
 
 	/**
@@ -120,12 +129,10 @@ public class ProductServiceImpl implements ProductService {
 	 * @throws ProductNotFoundException
 	 */
 	private ProductsVo findProductByProductId(Long id) throws ProductNotFoundException {
-		
+
 		LOGGER.info("Fetching the Product data for product id: " + id);
-		
-		pRepository.getOne(id);
-		
-		return prodDataHandler.handleProductData(id);
+
+		return pRepository.getOne(id);
 	}
 
 	/**
@@ -177,11 +184,12 @@ public class ProductServiceImpl implements ProductService {
 
 			// Assume, customer is buying the product having each article count 1.
 			int artQuantity = inventryVo.getQuantity() - 1;
-			
+
 			inventryVo.setQuantity(artQuantity);
-			
-			// if quantity become zero of any article from the product then product should not be buyable.
-			if(artQuantity==0)
+			inventryVo = iRepository.save(inventryVo);
+			// if quantity become zero of any article from the product then product should
+			// not be buyable.
+			if (artQuantity == 0)
 				break;
 		}
 		LOGGER.info(inventryVo);
@@ -199,7 +207,9 @@ public class ProductServiceImpl implements ProductService {
 
 		LOGGER.info("Fetching the Article details for Article id: " + articleId);
 
-		return prodDataHandler.handleInventryData(articleId);
+		InventryVo inVO = iRepository.getOne(articleId);
+
+		return inVO;
 	}
 
 }

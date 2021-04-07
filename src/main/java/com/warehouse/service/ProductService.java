@@ -6,6 +6,7 @@ package com.warehouse.service;
 import java.util.List;
 
 import com.warehouse.Exception.ProductNotFoundException;
+import com.warehouse.model.InventryVo;
 import com.warehouse.model.ProductsVo;
 
 /**
@@ -19,5 +20,7 @@ public interface ProductService {
 	public Boolean isProductAvailable(Long id) throws ProductNotFoundException;
 
 	public ProductsVo updateProductStatus(Long id) throws ProductNotFoundException;
+	
+	public List<InventryVo> getAllArticle();
 
 }
